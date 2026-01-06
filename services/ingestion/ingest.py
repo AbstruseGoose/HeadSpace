@@ -281,8 +281,11 @@ class MeshtasticInterface:
     def disconnect(self):
         """Disconnect from Meshtastic device"""
         if self.interface:
-            self.interface.close()
-            self.logger.info("Disconnected from Meshtastic device")
+            try:
+                self.interface.close()
+                self.logger.info("Disconnected from Meshtastic device")
+            except (AttributeError, Exception) as e:
+                self.logger.debug(f"Error during disconnect (non-critical): {e}")
     
     def _on_receive(self, packet, interface):
         """Callback when packet is received"""
