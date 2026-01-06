@@ -1,0 +1,21 @@
+# HeadSpace Processing Service Requirements
+# Python dependencies for data processing and SSE
+
+# MQTT client
+paho-mqtt>=1.6.1
+
+# Configuration management
+PyYAML>=6.0
+
+# Web framework for SSE endpoint
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+
+# Logging
+colorlog>=6.7.0
+
+# Database
+# (SQLite is built into Python, no extra dependency needed)
+
+# Geospatial calculations
+geopy>=2.4.0

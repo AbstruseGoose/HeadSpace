@@ -1,0 +1,135 @@
+# HeadSpace Processing Service Configuration
+# Handles MQTT consumption, dwell detection, storage, and SSE broadcasting
+
+# Multi-site configuration (optional)
+# Uncomment and configure for distributed deployments
+site:
+  enabled: false  # Set to true for multi-site
+  id: "base-a"  # Unique site identifier (base-a, base-b, truck-1, etc.)
+  name: "Primary Base"  # Human-readable name
+  location:
+    lat: 47.6062  # Site latitude
+    lon: -122.3321  # Site longitude
+
+mqtt:
+  broker: localhost
+  port: 1883
+  username: null  # Set if authentication is enabled
+  password: null
+  client_id: headspace-process
+  
+  # Topics to subscribe to (supports wildcards)
+  topics:
+    - headspace/position/#
+    - headspace/telemetry/#
+    - headspace/discovery/#
+  
+  # Quality of Service
+  qos: 1
+  
+  # Keep alive interval (seconds)
+  keepalive: 60
+
+database:
+  path: /workspaces/HeadSpace/data/headspace.db
+  
+  # Enable WAL mode for better concurrency
+  wal_mode: true
+  
+  # Cache size (number of pages, -ve = KB)
+  cache_size: -10000  # 10MB
+  
+  # Busy timeout (milliseconds)
+  timeout: 5000
+
+dwell_detection:
+  enabled: true
+  
+  # Per-node-type thresholds
+  # radius: Maximum distance from center point (meters)
+  # min_duration: Minimum time to qualify as a dwell (seconds)
+  # max_duration: Maximum time before splitting into new dwell (seconds)
+  
+  dog:
+    radius_meters: 15
+    min_duration_seconds: 60
+    max_duration_seconds: 7200  # 2 hours
+  
+  team_lead:
+    radius_meters: 20
+    min_duration_seconds: 180
+    max_duration_seconds: 14400  # 4 hours
+  
+  truck:
+    radius_meters: 25
+    min_duration_seconds: 300
+    max_duration_seconds: 28800  # 8 hours
+  
+  base_station:
+    # Base stations don't generate dwell events (stationary by design)
+    enabled: false
+  
+  repeater:
+    enabled: false
+  
+  # Default for unknown types
+  default:
+    radius_meters: 20
+    min_duration_seconds: 120
+    max_duration_seconds: 3600  # 1 hour
+
+status_thresholds:
+  # Age thresholds for node status classification (seconds)
+  live_seconds: 300      # < 5 minutes = LIVE
+  stale_seconds: 900     # 5-15 minutes = STALE
+  lost_seconds: 3600     # > 15 minutes = LOST (for UI display)
+  inactive_seconds: 86400  # 24 hours = mark inactive in DB
+
+sse:
+  # Server-Sent Events configuration
+  host: 0.0.0.0
+  port: 8081
+  
+  # Heartbeat to keep connection alive (seconds)
+  heartbeat_interval: 30
+  
+  # CORS origins (for dashboard)
+  cors_origins:
+    - "*"  # Allow all for development; restrict in production
+
+# In-memory state management
+state:
+  # Number of breadcrumb points to keep in memory per node
+  breadcrumb_buffer_size: 100
+  
+  # Interval to check node status and broadcast updates (seconds)
+  status_check_interval: 30
+
+# Cleanup and maintenance
+cleanup:
+  enabled: true
+  
+  # Run cleanup every N hours
+  interval_hours: 24
+  
+  # Data retention periods
+  keep_gps_days: 30
+  keep_telemetry_days: 7
+  keep_system_events_days: 30
+  
+  # Prune completed dwells older than (days)
+  keep_dwells_days: 90
+
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: null  # Set to path for file logging, null for stdout only
+  # file: /var/log/headspace/process.log
+
+# Performance tuning
+performance:
+  # Database commit strategy
+  commit_interval: 5  # Seconds (batch commits for performance)
+  
+  # Thread pool size for async operations
+  worker_threads: 4

@@ -1,0 +1,17 @@
+# HeadSpace - Python Dependencies
+
+# Meshtastic
+meshtastic>=2.3.0
+
+# MQTT
+paho-mqtt>=1.6.1
+
+# Web Framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Configuration
+pyyaml>=6.0.1
+
+# Data Processing
+python-dateutil>=2.8.2

@@ -1,0 +1,14 @@
+2026-01-04 21:06:58,839 [INFO] Database: Database initialized at /workspaces/HeadSpace/data/headspace.db
+Traceback (most recent call last):
+  File "/workspaces/HeadSpace/services/processing/processor.py", line 981, in <module>
+    main()
+  File "/workspaces/HeadSpace/services/processing/processor.py", line 969, in main
+    service = ProcessingService(config_path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/HeadSpace/services/processing/processor.py", line 711, in __init__
+    self.dwell_detector = create_dwell_detector_from_config(dwell_config)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/HeadSpace/services/processing/dwell_detector.py", line 406, in create_dwell_detector_from_config
+    radius_meters=settings.get('radius_meters', 20.0),
+                  ^^^^^^^^^^^^
+AttributeError: 'bool' object has no attribute 'get'

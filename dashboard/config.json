@@ -1,0 +1,51 @@
+{
+  "map": {
+    "default_center": [47.6062, -122.3321],
+    "default_zoom": 13,
+    "tile_layer": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "tile_attribution": "&copy; OpenStreetMap contributors",
+    "max_zoom": 18
+  },
+  "sse": {
+    "url": "http://localhost:8081/events",
+    "reconnect_interval": 3000
+  },
+  "ui": {
+    "auto_center_on_update": false,
+    "breadcrumb_max_points": 100,
+    "show_dwell_radius": true,
+    "node_icon_size": [32, 32]
+  },
+  "node_types": {
+    "dog": {
+      "icon": "🐕",
+      "color": "#FF6B6B",
+      "show_breadcrumbs": true
+    },
+    "base_station": {
+      "icon": "📡",
+      "color": "#4ECDC4",
+      "show_breadcrumbs": false
+    },
+    "team_lead": {
+      "icon": "👤",
+      "color": "#45B7D1",
+      "show_breadcrumbs": true
+    },
+    "truck": {
+      "icon": "🚚",
+      "color": "#FFA07A",
+      "show_breadcrumbs": true
+    },
+    "repeater": {
+      "icon": "🔁",
+      "color": "#98D8C8",
+      "show_breadcrumbs": false
+    },
+    "unknown": {
+      "icon": "❓",
+      "color": "#95A5A6",
+      "show_breadcrumbs": false
+    }
+  }
+}

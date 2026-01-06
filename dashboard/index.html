@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeadSpace - Dog Tracking Dashboard</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🐕 HeadSpace Tracker</h1>
+                <span class="connection-status" id="connection-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </span>
+            </div>
+            <div class="header-right">
+                <div class="stat-box">
+                    <span class="stat-label">Active Nodes</span>
+                    <span class="stat-value" id="active-nodes-count">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Last Update</span>
+                    <span class="stat-value" id="last-update">--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="map"></div>
+                
+                <!-- Map Controls -->
+                <div class="map-controls">
+                    <button class="control-btn" id="fit-all-btn" title="Fit all nodes">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <rect x="2" y="2" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="6" cy="6" r="2" fill="currentColor"/>
+                            <circle cx="14" cy="6" r="2" fill="currentColor"/>
+                            <circle cx="10" cy="14" r="2" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn" id="toggle-trails-btn" title="Toggle all trails">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path d="M2 10 L6 10 L10 4 L14 16 L18 10" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn" id="toggle-dwells-btn" title="Toggle dwell markers">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="2,2"/>
+                            <circle cx="10" cy="10" r="2" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Node List Panel -->
+            <div class="node-panel">
+                <div class="panel-header">
+                    <h2>Nodes</h2>
+                    <div class="panel-filters">
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filter-live" checked>
+                            <span class="filter-label">
+                                <span class="status-indicator live"></span> LIVE
+                            </span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filter-stale" checked>
+                            <span class="filter-label">
+                                <span class="status-indicator stale"></span> STALE
+                            </span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filter-lost" checked>
+                            <span class="filter-label">
+                                <span class="status-indicator lost"></span> LOST
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="node-list" id="node-list">
+                    <!-- Nodes will be dynamically added here -->
+                    <div class="no-nodes">
+                        <p>No nodes detected yet</p>
+                        <p class="hint">Waiting for GPS updates...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dwell Alert Toast -->
+        <div id="dwell-toast" class="dwell-toast hidden">
+            <div class="toast-icon">📍</div>
+            <div class="toast-content">
+                <div class="toast-title">Dwell Detected</div>
+                <div class="toast-message"></div>
+            </div>
+            <button class="toast-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Dashboard App JS -->
+    <script src="app.js"></script>
+</body>
+</html>

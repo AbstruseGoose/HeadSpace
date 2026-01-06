@@ -1,0 +1,9 @@
+nohup: ignoring input
+2026-01-04 22:05:41,227 [INFO] Dashboard: ============================================================
+2026-01-04 22:05:41,227 [INFO] Dashboard: HeadSpace Dashboard Server
+2026-01-04 22:05:41,227 [INFO] Dashboard: ============================================================
+2026-01-04 22:05:41,229 [INFO] Dashboard: Dashboard serving files from: /workspaces/HeadSpace/dashboard
+2026-01-04 22:05:41,229 [INFO] Dashboard: Dashboard available at http://localhost:8080
+2026-01-04 22:05:41,229 [INFO] Dashboard: Press Ctrl+C to stop
+ * Serving Flask app 'server'
+ * Debug mode: off

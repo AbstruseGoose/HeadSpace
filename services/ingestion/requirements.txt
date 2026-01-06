@@ -1,0 +1,17 @@
+# HeadSpace Ingestion Service Requirements
+# Python dependencies for Meshtastic ingestion
+
+# Meshtastic Python API
+meshtastic>=2.2.0
+
+# MQTT client
+paho-mqtt>=1.6.1
+
+# Configuration management
+PyYAML>=6.0
+
+# Logging
+colorlog>=6.7.0
+
+# Serial communication (dependency of meshtastic)
+pyserial>=3.5

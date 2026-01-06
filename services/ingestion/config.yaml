@@ -1,0 +1,86 @@
+# HeadSpace Ingestion Service Configuration
+# Handles Meshtastic gateway connection and MQTT publishing
+
+meshtastic:
+  # Connection method: 'serial' or 'tcp'
+  connection_type: serial
+  
+  # Serial connection settings (if connection_type = serial)
+  serial_port: auto  # 'auto' to detect, or specify '/dev/ttyUSB0'
+  baud_rate: 115200
+  
+  # TCP connection settings (if connection_type = tcp)
+  tcp_host: 192.168.1.100
+  tcp_port: 4403
+  
+  # Simulation mode (for testing without hardware)
+  simulation_mode: false
+  simulation_interval: 10  # Seconds between simulated updates
+  simulation_nodes:
+    - node_id: "!12345001"
+      name: "Dog-Rex"
+      type: dog
+      movement: circle
+    - node_id: "!12345002"
+      name: "Dog-Luna"
+      type: dog
+      movement: figure8
+    - node_id: "!12345003"
+      name: "Base-Station-1"
+      type: base_station
+      movement: stationary
+    - node_id: "!12345004"
+      name: "Team-Lead-1"
+      type: team_lead
+      movement: random_walk
+
+mqtt:
+  broker: localhost
+  port: 1883
+  username: null  # Set if authentication is enabled
+  password: null
+  client_id: headspace-ingest
+  
+  # Topic structure
+  topics:
+    position: headspace/position
+    telemetry: headspace/telemetry
+    discovery: headspace/discovery
+  
+  # Quality of Service (0, 1, or 2)
+  qos: 1
+  
+  # Retain messages
+  retain: false
+  
+  # Keep alive interval (seconds)
+  keepalive: 60
+
+# Node type mapping (overrides automatic detection)
+# Format: node_id: type
+node_types: {}
+  # Example:
+  # "!a1b2c3d4": dog
+  # "!e5f6g7h8": base_station
+
+# Node name overrides (if you want custom names)
+node_names: {}
+  # Example:
+  # "!a1b2c3d4": "Dog-Rex"
+  # "!e5f6g7h8": "Base-North"
+
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: null  # Set to path for file logging, null for stdout only
+  # file: /var/log/headspace/ingest.log
+
+# Performance tuning
+performance:
+  # Batch position updates if multiple arrive quickly
+  batch_enabled: false
+  batch_interval: 1.0  # Seconds
+  
+  # Skip duplicate positions (same coords within threshold)
+  deduplicate_enabled: true
+  deduplicate_distance: 1.0  # Meters
