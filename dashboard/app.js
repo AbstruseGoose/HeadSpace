@@ -8,8 +8,8 @@ class HeadSpaceDashboard {
             sseUrl: `http://${window.location.hostname}:8081/events`,
             mapCenter: [47.6062, -122.3321],
             mapZoom: 13,
-            tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            tileAttribution: '&copy; OpenStreetMap contributors'
+            tileLayer: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            tileAttribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         };
         
         // State
