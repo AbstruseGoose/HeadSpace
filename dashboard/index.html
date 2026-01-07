@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeadSpace - Dog Tracking Dashboard</title>
+    <title>HeadSpace - Tactical Tracking System</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,19 +16,24 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <h1>🐕 HeadSpace Tracker</h1>
+                <h1>⬡ HEADSPACE</h1>
                 <span class="connection-status" id="connection-status">
                     <span class="status-dot"></span>
                     <span class="status-text">Connecting...</span>
                 </span>
+                <div class="gateway-info" id="gateway-info" style="display: none;">
+                    <span class="gateway-label">GATEWAY</span>
+                    <span class="gateway-name" id="gateway-name">--</span>
+                    <span class="gateway-battery" id="gateway-battery">--</span>
+                </div>
             </div>
             <div class="header-right">
                 <div class="stat-box">
-                    <span class="stat-label">Active Nodes</span>
+                    <span class="stat-label">ACTIVE NODES</span>
                     <span class="stat-value" id="active-nodes-count">0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Last Update</span>
+                    <span class="stat-label">LAST UPDATE</span>
                     <span class="stat-value" id="last-update">--</span>
                 </div>
             </div>

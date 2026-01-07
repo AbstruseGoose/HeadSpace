@@ -1,33 +1,42 @@
-/* HeadSpace Dashboard Styles */
+/* HeadSpace Dashboard Styles - Tactical GitHub Dark Theme */
 
 :root {
-    /* Colors */
-    --primary-color: #2196F3;
-    --primary-dark: #1976D2;
-    --success-color: #4CAF50;
-    --warning-color: #FF9800;
-    --danger-color: #F44336;
-    --dark-bg: #1a1a2e;
-    --card-bg: #16213e;
-    --text-primary: #ffffff;
-    --text-secondary: #b8b8b8;
-    --border-color: #2d2d44;
+    /* GitHub Dark Theme Colors */
+    --gh-canvas-default: #0d1117;
+    --gh-canvas-subtle: #161b22;
+    --gh-border-default: #30363d;
+    --gh-border-muted: #21262d;
+    --gh-fg-default: #e6edf3;
+    --gh-fg-muted: #7d8590;
+    --gh-fg-subtle: #6e7681;
+    --gh-accent-fg: #2f81f7;
+    --gh-accent-emphasis: #1f6feb;
+    --gh-success-fg: #3fb950;
+    --gh-attention-fg: #d29922;
+    --gh-danger-fg: #f85149;
+    
+    /* Tactical Colors */
+    --tactical-primary: #58a6ff;
+    --tactical-success: #3fb950;
+    --tactical-warning: #d29922;
+    --tactical-danger: #f85149;
+    --tactical-info: #79c0ff;
     
     /* Status Colors */
-    --status-live: #4CAF50;
-    --status-stale: #FF9800;
-    --status-lost: #F44336;
+    --status-live: #3fb950;
+    --status-stale: #d29922;
+    --status-lost: #f85149;
     
     /* Node Type Colors */
-    --node-dog: #FF6B6B;
-    --node-base: #4ECDC4;
-    --node-team: #45B7D1;
-    --node-truck: #FFA07A;
-    --node-repeater: #98D8C8;
-    --node-unknown: #95A5A6;
+    --node-dog: #f85149;
+    --node-base: #58a6ff;
+    --node-team: #79c0ff;
+    --node-truck: #d29922;
+    --node-repeater: #7ee787;
+    --node-unknown: #6e7681;
     
-    /* Spacing */
-    --header-height: 70px;
+    /* Layout */
+    --header-height: 60px;
     --panel-width: 350px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
@@ -42,10 +51,11 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: var(--dark-bg);
-    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    background: var(--gh-canvas-default);
+    color: var(--gh-fg-default);
     overflow: hidden;
+    font-size: 14px;
 }
 
 #app {
@@ -57,8 +67,8 @@ body {
 /* Header */
 .header {
     height: var(--header-height);
-    background: var(--card-bg);
-    border-bottom: 2px solid var(--border-color);
+    background: var(--gh-canvas-subtle);
+    border-bottom: 1px solid var(--gh-border-default);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -72,30 +82,65 @@ body {
 }
 
 .header h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--gh-fg-default);
 }
 
 .connection-status {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 4px 12px;
+    background: var(--gh-canvas-default);
+    border: 1px solid var(--gh-border-default);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--status-lost);
+    background: var(--tactical-danger);
     animation: pulse 2s infinite;
 }
 
 .connection-status.connected .status-dot {
-    background: var(--status-live);
+    background: var(--tactical-success);
+}
+
+.gateway-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 12px;
+    background: var(--gh-canvas-default);
+    border: 1px solid var(--gh-border-default);
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.gateway-label {
+    color: var(--gh-fg-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gateway-name {
+    color: var(--tactical-info);
+    font-weight: 500;
+}
+
+.gateway-battery {
+    color: var(--tactical-success);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
 }
 
 .connection-status.disconnected .status-dot {
@@ -119,16 +164,18 @@ body {
 }
 
 .stat-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.7rem;
+    color: var(--gh-fg-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .stat-value {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--tactical-info);
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
 /* Main Content */

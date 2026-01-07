@@ -20,6 +20,9 @@ class HeadSpaceDashboard {
         this.selectedNodeId = null;
         this.showTrails = true;
         this.showDwells = true;
+        this.gatewayNode = null;
+        this.userLocation = null;
+        this.userMarker = null;
         
         // SSE
         this.eventSource = null;
@@ -29,6 +32,7 @@ class HeadSpaceDashboard {
         // Initialize
         this.initializeMap();
         this.setupEventListeners();
+        this.requestGeolocation();
         this.connectSSE();
     }
     
@@ -47,6 +51,86 @@ class HeadSpaceDashboard {
         }).addTo(this.map);
         
         console.log('Map initialized');
+    }
+    
+    // ========================================================================
+    // Geolocation
+    // ========================================================================
+    
+    requestGeolocation() {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.userLocation = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    };
+                    
+                    // Center map on user location
+                    this.map.setView([this.userLocation.lat, this.userLocation.lon], 15);
+                    
+                    // Add user marker
+                    const userIcon = L.divIcon({
+                        html: '<div class="user-location-marker">📍</div>',
+                        className: 'user-marker',
+                        iconSize: [24, 24]
+                    });
+                    
+                    this.userMarker = L.marker([this.userLocation.lat, this.userLocation.lon], {
+                        icon: userIcon,
+                        zIndexOffset: 1000
+                    }).addTo(this.map);
+                    
+                    console.log('User location:', this.userLocation);
+                    
+                    // Watch position for updates
+                    navigator.geolocation.watchPosition(
+                        (position) => {
+                            this.userLocation = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude
+                            };
+                            if (this.userMarker) {
+                                this.userMarker.setLatLng([this.userLocation.lat, this.userLocation.lon]);
+                            }
+                        },
+                        (error) => console.warn('Geolocation watch error:', error),
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    );
+                },
+                (error) => {
+                    console.warn('Geolocation error:', error);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            console.warn('Geolocation not available');
+        }
+    }
+    
+    updateGatewayInfo(node) {
+        this.gatewayNode = node;
+        const gatewayInfo = document.getElementById('gateway-info');
+        const gatewayName = document.getElementById('gateway-name');
+        const gatewayBattery = document.getElementById('gateway-battery');
+        
+        if (node && node.telemetry) {
+            gatewayInfo.style.display = 'flex';
+            gatewayName.textContent = node.name || node.node_id;
+            
+            const battery = node.telemetry.battery_level || 0;
+            const batteryIcon = battery > 75 ? '█' : battery > 50 ? '▓' : battery > 25 ? '▒' : '░';
+            gatewayBattery.textContent = `${batteryIcon} ${battery}%`;
+            
+            // Color code battery
+            if (battery > 50) {
+                gatewayBattery.style.color = 'var(--tactical-success)';
+            } else if (battery > 20) {
+                gatewayBattery.style.color = 'var(--tactical-warning)';
+            } else {
+                gatewayBattery.style.color = 'var(--tactical-danger)';
+            }
+        }
     }
     
     // ========================================================================
@@ -239,6 +323,11 @@ class HeadSpaceDashboard {
             node.telemetry = { ...node.telemetry, ...data.telemetry };
             node.status = data.status;
             node.last_update = Date.now();
+            
+            // Update gateway info if this is the connected node (first node we see)
+            if (!this.gatewayNode || this.gatewayNode.node_id === nodeId) {
+                this.updateGatewayInfo(node);
+            }
             
             // Update node list item
             this.updateNodeList();
