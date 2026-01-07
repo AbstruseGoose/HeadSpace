@@ -7,7 +7,7 @@
     "max_zoom": 18
   },
   "sse": {
-    "url": "http://localhost:8081/events",
+    "url": "AUTO",
     "reconnect_interval": 3000
   },
   "ui": {
