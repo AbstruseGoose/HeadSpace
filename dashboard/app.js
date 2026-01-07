@@ -168,6 +168,16 @@ class HeadSpaceDashboard {
         document.querySelector('.toast-close').addEventListener('click', () => {
             this.hideDwellToast();
         });
+        
+        // Battery warning close
+        document.querySelector('.warning-close').addEventListener('click', () => {
+            document.getElementById('battery-warning').classList.add('hidden');
+        });
+        
+        // Clear events button
+        document.getElementById('clear-events-btn').addEventListener('click', () => {
+            this.clearEvents();
+        });
     }
     
     // ========================================================================
@@ -263,8 +273,10 @@ class HeadSpaceDashboard {
         const telemetry = data.telemetry || {};
         const status = data.status;
         
+        const isNewNode = !this.nodes.has(nodeId);
+        
         // Update or create node
-        if (!this.nodes.has(nodeId)) {
+        if (isNewNode) {
             this.nodes.set(nodeId, {
                 node_id: nodeId,
                 node_name: nodeName,
@@ -273,10 +285,23 @@ class HeadSpaceDashboard {
                 telemetry: telemetry,
                 status: status,
                 trail: [],
-                last_update: Date.now()
+                last_update: Date.now(),
+                speed: 0,
+                heading: 0,
+                lastPosition: null,
+                lastPositionTime: null,
+                batteryWarningShown: false
             });
+            this.addEvent(`📍 Node ${nodeName} appeared on mesh`, 'success');
         } else {
             const node = this.nodes.get(nodeId);
+            
+            // Calculate speed and heading
+            this.calculateSpeedAndHeading(node, {
+                lat: position.latitude,
+                lon: position.longitude
+            });
+            
             node.position = position;
             node.telemetry = { ...node.telemetry, ...telemetry };
             node.status = status;
@@ -323,6 +348,9 @@ class HeadSpaceDashboard {
             node.telemetry = { ...node.telemetry, ...data.telemetry };
             node.status = data.status;
             node.last_update = Date.now();
+            
+            // Check battery warnings
+            this.checkBatteryWarning(node);
             
             // Update gateway info if this is the connected node (first node we see)
             if (!this.gatewayNode || this.gatewayNode.node_id === nodeId) {
@@ -667,6 +695,19 @@ class HeadSpaceDashboard {
         
         const hasTrail = this.trails.has(node.node_id);
         
+        // Distance from user
+        const distance = this.getDistanceFromUser(node);
+        const distanceStr = distance ? this.formatDistance(distance) : '--';
+        
+        // Speed and heading
+        const speed = node.speed || 0;
+        const speedStr = speed > 0.5 ? `${(speed * 3.6).toFixed(1)} km/h ${this.getHeadingArrow(node.heading || 0)}` : 'Stationary';
+        
+        // Signal strength with SNR if available
+        const snr = tel.snr || null;
+        const signalStr = snr ? `SNR ${snr.toFixed(1)} dB` : (rssi !== '--' ? `${rssi} dBm` : '--');
+        const signalClass = snr ? (snr > 5 ? 'good' : snr > 0 ? 'warning' : 'bad') : rssiClass;
+        
         return `
             <div class="node-item ${this.selectedNodeId === node.node_id ? 'selected' : ''}" 
                  id="node-${node.node_id}"
@@ -685,7 +726,15 @@ class HeadSpaceDashboard {
                     </div>
                     <div class="node-detail">
                         <span class="detail-label">Signal</span>
-                        <span class="detail-value ${rssiClass}">${rssi}${rssi !== '--' ? ' dBm' : ''}</span>
+                        <span class="detail-value ${signalClass}">${signalStr}</span>
+                    </div>
+                    <div class="node-detail">
+                        <span class="detail-label">Distance</span>
+                        <span class="detail-value">${distanceStr}</span>
+                    </div>
+                    <div class="node-detail">
+                        <span class="detail-label">Speed</span>
+                        <span class="detail-value">${speedStr}</span>
                     </div>
                     <div class="node-detail">
                         <span class="detail-label">Age</span>
@@ -800,6 +849,154 @@ class HeadSpaceDashboard {
     
     hideDwellToast() {
         document.getElementById('dwell-toast').classList.add('hidden');
+    }
+    
+    // ========================================================================
+    // Event Feed
+    // ========================================================================
+    
+    addEvent(message, type = 'info') {
+        const feed = document.getElementById('event-feed');
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        
+        const eventItem = document.createElement('div');
+        eventItem.className = `event-item event-${type}`;
+        eventItem.innerHTML = `
+            <span class="event-time">${time}</span>
+            <span class="event-message">${message}</span>
+        `;
+        
+        feed.insertBefore(eventItem, feed.firstChild);
+        
+        // Keep only last 50 events
+        while (feed.children.length > 50) {
+            feed.removeChild(feed.lastChild);
+        }
+    }
+    
+    clearEvents() {
+        const feed = document.getElementById('event-feed');
+        feed.innerHTML = `
+            <div class="event-item event-info">
+                <span class="event-time">--:--:--</span>
+                <span class="event-message">Events cleared</span>
+            </div>
+        `;
+    }
+    
+    // ========================================================================
+    // Distance Calculations
+    // ========================================================================
+    
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth radius in meters
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        
+        return R * c; // Distance in meters
+    }
+    
+    formatDistance(meters) {
+        if (meters < 1000) {
+            return `${Math.round(meters)}m`;
+        } else if (meters < 10000) {
+            return `${(meters / 1000).toFixed(1)}km`;
+        } else {
+            return `${Math.round(meters / 1000)}km`;
+        }
+    }
+    
+    getDistanceFromUser(node) {
+        if (!this.userLocation || !node.position) return null;
+        return this.calculateDistance(
+            this.userLocation.lat,
+            this.userLocation.lon,
+            node.position.lat,
+            node.position.lon
+        );
+    }
+    
+    // ========================================================================
+    // Speed & Heading Calculations
+    // ========================================================================
+    
+    calculateSpeedAndHeading(node, newPosition) {
+        if (!node.lastPosition || !node.lastPositionTime) {
+            node.lastPosition = newPosition;
+            node.lastPositionTime = Date.now();
+            node.speed = 0;
+            node.heading = 0;
+            return;
+        }
+        
+        const timeDiff = (Date.now() - node.lastPositionTime) / 1000; // seconds
+        if (timeDiff < 5) return; // Update every 5 seconds minimum
+        
+        const distance = this.calculateDistance(
+            node.lastPosition.lat,
+            node.lastPosition.lon,
+            newPosition.lat,
+            newPosition.lon
+        );
+        
+        // Speed in m/s
+        node.speed = distance / timeDiff;
+        
+        // Heading in degrees
+        const lat1 = node.lastPosition.lat * Math.PI / 180;
+        const lat2 = newPosition.lat * Math.PI / 180;
+        const dLon = (newPosition.lon - node.lastPosition.lon) * Math.PI / 180;
+        
+        const y = Math.sin(dLon) * Math.cos(lat2);
+        const x = Math.cos(lat1) * Math.sin(lat2) -
+                  Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+        node.heading = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        
+        node.lastPosition = newPosition;
+        node.lastPositionTime = Date.now();
+    }
+    
+    getHeadingArrow(heading) {
+        const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+        const index = Math.round(heading / 45) % 8;
+        return arrows[index];
+    }
+    
+    // ========================================================================
+    // Battery Warnings
+    // ========================================================================
+    
+    checkBatteryWarning(node) {
+        const battery = node.telemetry?.battery_level;
+        if (battery && battery <= 20 && !node.batteryWarningShown) {
+            this.showBatteryWarning(node);
+            node.batteryWarningShown = true;
+        } else if (battery && battery > 20) {
+            node.batteryWarningShown = false;
+        }
+    }
+    
+    showBatteryWarning(node) {
+        const warning = document.getElementById('battery-warning');
+        const message = document.querySelector('.warning-message');
+        
+        const battery = node.telemetry.battery_level;
+        message.textContent = `${node.node_name} battery at ${battery}%`;
+        
+        warning.classList.remove('hidden');
+        this.addEvent(`⚠️ ${node.node_name} low battery: ${battery}%`, 'danger');
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            warning.classList.add('hidden');
+        }, 10000);
     }
 }
 
