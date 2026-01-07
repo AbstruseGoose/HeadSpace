@@ -266,8 +266,16 @@ class MeshtasticInterface:
                     self.logger.info(f"Connecting to Meshtastic device on {serial_port}")
                     self.interface = meshtastic.serial_interface.SerialInterface(serial_port)
                 
-                # Register packet callback
-                self.interface.onReceive = self._on_receive
+                # Register packet callback (try both old and new API)
+                try:
+                    # New API using pubsub
+                    from pubsub import pub
+                    pub.subscribe(self._on_receive_pubsub, "meshtastic.receive")
+                    self.logger.info("Registered callback using pubsub API")
+                except:
+                    # Legacy API
+                    self.interface.onReceive = self._on_receive
+                    self.logger.info("Registered callback using legacy API")
                 
                 self.logger.info("Connected to Meshtastic device")
                 
@@ -288,8 +296,17 @@ class MeshtasticInterface:
                 self.logger.debug(f"Error during disconnect (non-critical): {e}")
     
     def _on_receive(self, packet, interface):
-        """Callback when packet is received"""
+        """Callback when packet is received (legacy API)"""
         try:
+            self.logger.debug(f"Received packet via legacy API: {packet.get('fromId', 'unknown')}")
+            self._handle_packet(packet)
+        except Exception as e:
+            self.logger.error(f"Error handling packet: {e}", exc_info=True)
+    
+    def _on_receive_pubsub(self, packet, interface=None):
+        """Callback when packet is received (pubsub API)"""
+        try:
+            self.logger.debug(f"Received packet via pubsub API: {packet.get('fromId', 'unknown')}")
             self._handle_packet(packet)
         except Exception as e:
             self.logger.error(f"Error handling packet: {e}", exc_info=True)
