@@ -5,7 +5,7 @@ class HeadSpaceDashboard {
     constructor() {
         // Configuration
         this.config = {
-            sseUrl: 'http://localhost:8081/events',
+            sseUrl: `http://${window.location.hostname}:8081/events`,
             mapCenter: [47.6062, -122.3321],
             mapZoom: 13,
             tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
